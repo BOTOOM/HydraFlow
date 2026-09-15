@@ -63,7 +63,7 @@ class ReminderSettings {
   const ReminderSettings({
     this.enabled = false, this.wakeHour = 8, this.wakeMinute = 0,
     this.sleepHour = 22, this.sleepMinute = 0, this.intervalMinutes = 120,
-    this.sound = 'campanita', this.pauseWhenGoalReached = true,
+    this.sound = 'gotas', this.pauseWhenGoalReached = true,
     this.splashEnabled = true,
   });
   final bool enabled;
@@ -96,11 +96,17 @@ class ReminderSettings {
     sleepHour: (json['sleepHour'] as num?)?.toInt() ?? 22,
     sleepMinute: (json['sleepMinute'] as num?)?.toInt() ?? 0,
     intervalMinutes: (json['intervalMinutes'] as num?)?.toInt() ?? 120,
-    sound: json['sound'] as String? ?? 'campanita',
+    sound: _migrateReminderSound(json['sound'] as String?),
     pauseWhenGoalReached: json['pauseWhenGoalReached'] as bool? ?? true,
     splashEnabled: json['splashEnabled'] as bool? ?? true,
   );
 }
+
+String _migrateReminderSound(String? sound) => switch (sound) {
+  'gota' => 'gotas',
+  'vertido' => 'chorro',
+  _ => sound ?? 'gotas',
+};
 
 class IntakeEntry {
   const IntakeEntry({

@@ -41,6 +41,9 @@ class IntakeController extends ChangeNotifier {
   final NotificationService notifications;
   List<IntakeEntry> entries = [];
   bool loading = true;
+
+  /// Incremented on every logged drink so the avatar can celebrate.
+  int celebrations = 0;
   Future<void> load() async { entries = await database.all(); loading = false; notifyListeners(); }
   List<IntakeEntry> get todayEntries {
     final today = DateTime.now();
@@ -61,6 +64,7 @@ class IntakeController extends ChangeNotifier {
     final entry = IntakeEntry(drinkId: drinkId, volumeMl: volumeMl, effectiveMl: drink.effectiveMl(volumeMl), timestamp: DateTime.now(), goalMl: todayGoal);
     final id = await database.insert(entry);
     entries = [entry.copyWith(id: id), ...entries];
+    celebrations++;
     if (profile.repository.reminders.splashEnabled) await sound.play('splash');
     final settings = profile.repository.reminders;
     await notifications.schedule(settings, pause: settings.pauseWhenGoalReached && todayTotal >= todayGoal);

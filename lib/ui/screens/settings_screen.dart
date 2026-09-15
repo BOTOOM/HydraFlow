@@ -10,8 +10,10 @@ import '../widgets/profile_form.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
   static const _sounds = <String, String>{
-    'ninguno': 'Ninguno', 'gota': 'Gota', 'burbujas': 'Burbujas',
-    'vertido': 'Vertido', 'campanita': 'Campanita', 'marimba': 'Marimba',
+    'lluvia': 'Lluvia', 'grifo': 'Grifo', 'chorro': 'Chorro de agua',
+    'gotas': 'Gotas', 'burbujas': 'Burbujas', 'arroyo': 'Arroyo',
+    'ola': 'Ola', 'campanita': 'Campanita', 'marimba': 'Marimba',
+    'ninguno': 'Ninguno',
   };
 
   @override

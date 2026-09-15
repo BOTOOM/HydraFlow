@@ -8,14 +8,36 @@ import '../domain/models.dart';
 class NotificationService {
   final plugin = FlutterLocalNotificationsPlugin();
   static const messages = [
-    'Un sorbo ahora, gracias después.',
-    'Tu cuerpo te lo va a agradecer. ¿Un poco de agua?',
-    'Pausa breve: hidrátate.',
-    'El siguiente sorbo cuenta.',
-    'Tu ola sigue creciendo.',
-    'Respira y toma algo rico.',
+    'Un sorbo de agua ahora, gracias después.',
+    'Tu cuerpo te lo va a agradecer. ¿Agua?',
+    'Pausa breve: hidrátate con agua.',
+    'El siguiente sorbo también cuenta.',
+    'Tu ola sigue creciendo, ¡ánimo!',
+    'Respira y toma un sorbo de agua.',
     'Hidratarte también es cuidarte.',
-    'Un pequeño sorbo, una gran diferencia.',
+    'Un pequeño sorbo hace gran diferencia.',
+    '¿Sed? Tu agua te está esperando.',
+    'Agua lista: regálate un sorbo.',
+    'Tu yo de la tarde agradecerá esta agua.',
+    'Un sorbo y vuelves con más energía.',
+    'Hidratación desbloqueada: toma agua.',
+    'Tu recordatorio favorito: agua fresca.',
+    'Sorbito pequeño, día más fluido.',
+    'Haz una pausa azul: toma agua.',
+    '¿Brindamos? Por ti y por tu agua.',
+    'El agua también cuenta como autocuidado.',
+    'Misión del momento: un sorbo.',
+    'Tu ola pide un poquito de agua.',
+    'Agua en mano, ¡seguimos!',
+    'Un sorbo ahora mantiene el ritmo.',
+    'La constancia empieza con agua.',
+    'Toma agua antes de volver a lo tuyo.',
+    'Tu cuerpo trabaja mejor hidratado.',
+    'Un chorrito de agua para continuar.',
+    'Pequeño recordatorio, gran hábito.',
+    'Dale a tu día un sorbo de agua.',
+    '¡Vamos! Suma otro sorbo a tu ola.',
+    'Agua, pausa y a seguir.',
   ];
 
   Future<void> init() async {
@@ -57,7 +79,7 @@ class NotificationService {
       while (at.isBefore(adjustedEnd) && count < 64) {
         if (at.isAfter(now)) {
           await plugin.zonedSchedule(
-            1000 + count, 'HydraFlow', messages[count % messages.length],
+            1000 + count, 'HydraFlow', messages[(count + now.day * 7) % messages.length],
             at, _details(settings.sound),
             androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           );
