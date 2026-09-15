@@ -1,0 +1,10 @@
+allprojects {
+    buildscript {
+        repositories {
+            maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
+        }
+    }
+    repositories {
+        maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
+    }
+}
