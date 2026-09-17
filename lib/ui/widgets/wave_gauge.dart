@@ -21,7 +21,7 @@ class _WaveGaugeState extends State<WaveGauge> with SingleTickerProviderStateMix
       child: SizedBox(width: 260, height: 260, child: Center(child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('${(widget.progress * 100).round()}%', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w800)),
+          Text('${(widget.total / max(widget.goal, 1) * 100).round()}%', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w800)),
           Text(formatVolumePair(widget.total, widget.goal, widget.unit), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14)),
         ],
       ))),
