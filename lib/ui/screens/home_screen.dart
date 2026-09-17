@@ -3,11 +3,13 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../domain/avatar_mood.dart';
 import '../../domain/drink.dart';
+import '../../domain/hydration_insights.dart';
 import '../../domain/models.dart';
 import '../../state/controllers.dart';
 import '../theme.dart';
 import '../widgets/drink_tile.dart';
 import '../widgets/droplet_avatar.dart';
+import '../widgets/insight_card.dart';
 import '../widgets/wave_gauge.dart';
 import '../formatters.dart';
 
@@ -17,6 +19,11 @@ class HomeScreen extends StatelessWidget {
     final intake = context.watch<IntakeController>();
     final profile = context.watch<ProfileController>();
     final reminders = context.watch<ReminderController>().settings;
+    final insights = hydrationInsightsFor(
+      entries: intake.entries,
+      goalMl: intake.todayGoal,
+      now: DateTime.now(),
+    );
     final avatar = avatarStateFor(
       totalMl: intake.todayTotal,
       goalMl: intake.todayGoal,
@@ -43,6 +50,15 @@ class HomeScreen extends StatelessWidget {
           ]),
           const SizedBox(height: 8),
           WaveGauge(progress: intake.progress, total: intake.todayTotal, goal: intake.todayGoal, unit: profile.unit),
+          if (insights.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            ...insights.map(
+              (insight) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: InsightCard(insight: insight),
+              ),
+            ),
+          ],
           FilledButton.icon(onPressed: () => _addSheet(context), icon: const Icon(Icons.add), label: const Text('Añadir bebida')),
         ]))),
         if (intake.recentDrinkIds.isNotEmpty) ...[

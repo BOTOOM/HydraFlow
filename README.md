@@ -23,10 +23,11 @@
 | | |
 |---|---|
 | 🎯 **Meta personalizada** | Calculada a partir de sexo, edad, peso, actividad, clima, embarazo y lactancia siguiendo las recomendaciones de la EFSA (35 ml/kg hombre · 31 mujer · 33 otro, más ajustes). Puedes fijar una meta manual cuando quieras. |
+| ⚕️ **Avisos de salud** | Señala sobrehidratación o una racha de baja hidratación con orientación no diagnóstica. |
 | 🥤 **20+ bebidas con equivalencia** | No todo hidrata igual: agua 100 %, té 98 %, café 95 %, leche 90 %, jugo 88 %, refresco 90 %, cerveza 60 %, vino 30 %, licor 0 %… Coeficientes basados en el contenido de agua y el *Beverage Hydration Index*. Crea tus propias bebidas con su porcentaje. |
 | 💧 **Gotita compañera** | Un avatar procedural (dibujado con `CustomPainter`, no un SVG estático) que respira, parpadea, celebra cada sorbo y se sacude al tocarlo. Su humor, color y forma cambian según lo cerca o lejos que estés de la meta a lo largo del día: feliz por la mañana, radiante al cumplir, sedienta o marchita si te atrasas, y súper feliz de noche si fuiste bien. |
 | 🌊 **Hoy** | Medidor de anillo con ola animada, porcentaje y ml/oz, racha de días, registros del día (desliza para borrar) y accesos rápidos a tus bebidas recientes. |
-| 📈 **Historial** | Gráfica de 7 / 30 días contra tu meta y detalle día a día. |
+| 📈 **Historial** | Gráfica de 7 / 30 días contra tu meta y detalle día a día; la escala crece para mostrar porcentajes por encima del 100 %. |
 | 🔔 **Recordatorios** | Horario de despertar/dormir, intervalo de 15 min a 3 h, pausa automática al cumplir la meta y notificación de prueba. 30 mensajes distintos que rotan cada día. |
 | 🎧 **Sonidos de agua** | Lluvia, grifo, chorro de agua, gotas, burbujas, arroyo y ola (además de campanita, marimba y un *splash* al registrar). Sintetizados con ruido filtrado por [`tool/gen_sounds.py`](tool/gen_sounds.py); con vista previa desde Ajustes. |
 | 📱 **Responsive** | Barra inferior en teléfono; `NavigationRail` y dos columnas en tablet. Tema claro / oscuro, unidades ml / oz, icono adaptativo propio. |

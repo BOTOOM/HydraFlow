@@ -92,6 +92,22 @@ Adding an entry: choose drink → choose size chip or type custom ml → "Añadi
    sonido list with preview play button, pausar cuando la meta esté cumplida toggle), Bebidas (manage custom),
    Tema (sistema/claro/oscuro), Unidades (ml / oz), Acerca de (data sources: EFSA, Maughan 2016).
 
+### Avisos de salud
+
+HydraFlow muestra orientación no diagnóstica basada en los registros:
+
+- ≥1 L en una hora: aviso de cautela sobre repartir los sorbos.
+- ≥1,4 L en una hora: aviso urgente para hacer una pausa y vigilar señales de
+  hiponatremia.
+- ≥150 % de la meta diaria: aviso de posible exceso de agua.
+- ≥3 días consecutivos por debajo del 50 % de la meta: aviso informativo; a
+  partir de ≥5 días, aviso de cautela. Solo se cuentan días desde el primer
+  registro y se excluye el día actual.
+
+Las referencias orientativas son NIOSH 2017-126, *Heat Stress* (no más de
+~1,4 L/h), Mayo Clinic sobre hiponatremia y NHS sobre deshidratación. Estos
+avisos no sustituyen un diagnóstico ni la atención de un profesional de salud.
+
 ## Notifications
 - `flutter_local_notifications` + `timezone` + `flutter_timezone`. Schedule `zonedSchedule` for each reminder slot
   between wake and sleep time at the chosen interval, for today and tomorrow (re-schedule on app open, on any
