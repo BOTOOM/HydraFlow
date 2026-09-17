@@ -68,25 +68,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         dayLabelHeight;
                     return Stack(
                       children: [
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: dayLabelHeight + barAreaHeight * goalFraction,
-                          child: Row(
-                            children: [
-                              const Expanded(
-                                child: Divider(color: HydraTheme.coral),
-                              ),
-                              Text(
-                                ' meta',
-                                style: TextStyle(
-                                  color: HydraTheme.coral,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: List.generate(days.length, (index) {
@@ -146,6 +127,30 @@ class _HistoryScreenState extends State<HistoryScreen> {
                               ),
                             );
                           }),
+                        ),
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: dayLabelHeight + barAreaHeight * goalFraction,
+                          child: Row(
+                            children: [
+                              const Expanded(
+                                child: Divider(color: HydraTheme.coral),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor,
+                                  border: Border.all(color: HydraTheme.coral),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text(
+                                  'meta',
+                                  style: TextStyle(color: HydraTheme.coral, fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     );
