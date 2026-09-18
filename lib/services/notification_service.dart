@@ -49,14 +49,15 @@ class NotificationService {
       tz.setLocalLocation(tz.UTC);
     }
     const android = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const ios = DarwinInitializationSettings();
-    await plugin.initialize(const InitializationSettings(android: android, iOS: ios));
+    const darwin = DarwinInitializationSettings();
+    await plugin.initialize(const InitializationSettings(android: android, iOS: darwin, macOS: darwin));
   }
 
   Future<void> requestPermissions() async {
     await plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestNotificationsPermission();
     await plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()?.requestExactAlarmsPermission();
     await plugin.resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()?.requestPermissions(alert: true, sound: true);
+    await plugin.resolvePlatformSpecificImplementation<MacOSFlutterLocalNotificationsPlugin>()?.requestPermissions(alert: true, sound: true);
   }
 
   Future<void> schedule(ReminderSettings settings, {bool pause = false}) async {
@@ -108,5 +109,6 @@ class NotificationService {
       sound: sound == 'ninguno' ? null : RawResourceAndroidNotificationSound(sound),
     ),
     iOS: DarwinNotificationDetails(sound: sound == 'ninguno' ? null : '$sound.caf'),
+    macOS: DarwinNotificationDetails(sound: sound == 'ninguno' ? null : '$sound.caf'),
   );
 }

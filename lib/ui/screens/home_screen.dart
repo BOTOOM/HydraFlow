@@ -176,11 +176,15 @@ class _DrinkPickerState extends State<_DrinkPicker> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Padding(
+        padding: EdgeInsets.fromLTRB(16, 0, 16, 24 + keyboard),
         child: SizedBox(
-          height: height * .8,
+          height: (height - keyboard) * .8,
           child: Column(
             children: [
               const Text(
@@ -223,6 +227,8 @@ class _DrinkPickerState extends State<_DrinkPicker> {
                           child: TextField(
                             controller: customController,
                             keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _addCustom(),
                             decoration: const InputDecoration(
                               labelText: 'Otra cantidad',
                               suffixText: 'ml',
@@ -231,13 +237,7 @@ class _DrinkPickerState extends State<_DrinkPicker> {
                           ),
                         ),
                         FilledButton(
-                          onPressed: () {
-                            final value = int.tryParse(customController.text);
-                            if (value != null && value > 0) {
-                              final drink = selected;
-                              if (drink != null) widget.onAdded(drink, value);
-                            }
-                          },
+                          onPressed: _addCustom,
                           child: const Text('Añadir'),
                         ),
                       ],
@@ -246,7 +246,14 @@ class _DrinkPickerState extends State<_DrinkPicker> {
             ],
           ),
         ),
+        ),
       ),
     );
+  }
+
+  void _addCustom() {
+    final value = int.tryParse(customController.text);
+    final drink = selected;
+    if (value != null && value > 0 && drink != null) widget.onAdded(drink, value);
   }
 }

@@ -262,6 +262,7 @@ def splash():
 def save_and_convert(name, samples):
     wav_path = OUT / f"{name}.wav"
     ogg_path = OUT / f"{name}.ogg"
+    m4a_path = OUT / f"{name}.m4a"
     caf_path = IOS_OUT / f"{name}.caf"
     samples = np.asarray(samples, dtype=np.float64)
     with wave_module.open(str(wav_path), "wb") as wav_file:
@@ -271,6 +272,10 @@ def save_and_convert(name, samples):
         wav_file.writeframes((np.clip(samples, -1, 1) * 32767).astype(np.int16).tobytes())
     subprocess.run(
         ["ffmpeg", "-y", "-loglevel", "error", "-i", str(wav_path), "-ac", "1", "-ar", str(RATE), str(ogg_path)],
+        check=True,
+    )
+    subprocess.run(
+        ["ffmpeg", "-y", "-loglevel", "error", "-i", str(wav_path), "-ac", "1", "-ar", str(RATE), "-c:a", "aac", str(m4a_path)],
         check=True,
     )
     subprocess.run(

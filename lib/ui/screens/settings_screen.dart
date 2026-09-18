@@ -304,7 +304,7 @@ class _CustomDrinkDialogState extends State<_CustomDrinkDialog> {
       TextField(controller: name, decoration: const InputDecoration(labelText: 'Nombre')),
       const SizedBox(height: 12),
       Text('Hidratación: ${(coefficient * 100).round()}%'),
-      Slider(value: coefficient, onChanged: (value) => setState(() => coefficient = value)),
+      Slider(value: coefficient, divisions: 100, onChanged: (value) => setState(() => coefficient = (value * 100).round() / 100)),
       TextField(controller: size, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Tamaño predeterminado', suffixText: 'ml')),
       const SizedBox(height: 12),
       const Text('Color'),
