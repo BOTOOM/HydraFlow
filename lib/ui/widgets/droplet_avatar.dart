@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../domain/avatar_mood.dart';
@@ -51,10 +52,13 @@ class _DropletAvatarState extends State<DropletAvatar>
     _scheduleBlink();
   }
 
+  Timer? _blinkTimer;
+
   void _scheduleBlink() {
     final wait = Duration(milliseconds: 2200 + _random.nextInt(3200));
     final tick = ++_blinkTick;
-    Future<void>.delayed(wait, () async {
+    _blinkTimer?.cancel();
+    _blinkTimer = Timer(wait, () async {
       if (!mounted || tick != _blinkTick) return;
       await _blink.forward(from: 0);
       if (!mounted) return;
@@ -72,6 +76,7 @@ class _DropletAvatarState extends State<DropletAvatar>
   @override
   void dispose() {
     _blinkTick = -1;
+    _blinkTimer?.cancel();
     _idle.dispose();
     _blink.dispose();
     _shake.dispose();
