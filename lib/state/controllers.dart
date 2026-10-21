@@ -65,10 +65,16 @@ class IntakeController extends ChangeNotifier {
     final id = await database.insert(entry);
     entries = [entry.copyWith(id: id), ...entries];
     celebrations++;
-    if (profile.repository.reminders.splashEnabled) await sound.play('splash');
+    notifyListeners();
+    if (profile.repository.reminders.splashEnabled) {
+      try {
+        await sound.play('splash');
+      } catch (error) {
+        if (kDebugMode) debugPrint('HydraFlow: no se pudo reproducir el sonido de registro: $error');
+      }
+    }
     final settings = profile.repository.reminders;
     await notifications.schedule(settings, pause: settings.pauseWhenGoalReached && todayTotal >= todayGoal);
-    notifyListeners();
   }
   Future<void> remove(IntakeEntry entry) async { if (entry.id != null) await database.delete(entry.id!); entries.removeWhere((e) => e.id == entry.id); notifyListeners(); }
   int streak() {
