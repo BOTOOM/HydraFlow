@@ -43,6 +43,7 @@ Future<void> _mountShell(
   WidgetTester tester, {
   required Size size,
   required List<DisplayFeature> features,
+  bool disableHomeAnimations = false,
 }) async {
   await initializeDateFormatting('es');
   tester.view.physicalSize = size;
@@ -82,7 +83,12 @@ Future<void> _mountShell(
         ChangeNotifierProvider<IntakeController>.value(value: intake),
         Provider<SoundService>.value(value: sounds),
       ],
-      child: const MaterialApp(home: Shell()),
+      child: MaterialApp(
+        home: TickerMode(
+          enabled: !disableHomeAnimations,
+          child: const Shell(),
+        ),
+      ),
     ),
   );
   await tester.pump();
@@ -93,6 +99,11 @@ DisplayFeature _hinge(Rect bounds, DisplayFeatureState state) => DisplayFeature(
       type: DisplayFeatureType.hinge,
       state: state,
     );
+
+Future<void> _openDrinkPicker(WidgetTester tester) async {
+  await tester.tap(find.text('Añadir bebida').first);
+  await tester.pumpAndSettle();
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -130,6 +141,37 @@ void main() {
     expect(find.text('Abierto · dos paneles'), findsOneWidget);
     expect(tester.getRect(find.byKey(const ValueKey('pane-left'))).right, 440);
     expect(tester.getRect(find.byKey(const ValueKey('pane-right'))).left, 444);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('drink picker tiles fit in the flat fold pane', (tester) async {
+    await _mountShell(
+      tester,
+      size: const Size(884, 1104),
+      features: [
+        _hinge(
+          const Rect.fromLTRB(440, 0, 444, 1104),
+          DisplayFeatureState.postureFlat,
+        ),
+      ],
+      disableHomeAnimations: true,
+    );
+    await _openDrinkPicker(tester);
+
+    expect(find.text('Elige una bebida'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('drink picker tiles fit on a phone', (tester) async {
+    await _mountShell(
+      tester,
+      size: const Size(412, 915),
+      features: const [],
+      disableHomeAnimations: true,
+    );
+    await _openDrinkPicker(tester);
+
+    expect(find.text('Elige una bebida'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -383,6 +383,7 @@ class _DrinkPickerState extends State<_DrinkPicker> {
     customController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
@@ -401,12 +402,13 @@ class _DrinkPickerState extends State<_DrinkPicker> {
               Expanded(
                 child: GridView.builder(
                   itemCount: options.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
-                    childAspectRatio: .9,
+                    mainAxisExtent: MediaQuery.textScalerOf(context).scale(
+                      _drinkTileMinimumHeight + _drinkTileExtentMargin,
+                    ),
                   ),
                   itemBuilder: (_, i) => DrinkTile(
                     drink: options[i],
@@ -460,3 +462,6 @@ class _DrinkPickerState extends State<_DrinkPicker> {
     );
   }
 }
+
+const _drinkTileMinimumHeight = 120.0;
+const _drinkTileExtentMargin = 6.0;
