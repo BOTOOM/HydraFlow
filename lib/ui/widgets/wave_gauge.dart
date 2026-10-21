@@ -5,11 +5,12 @@ import '../theme.dart';
 import '../formatters.dart';
 
 class WaveGauge extends StatefulWidget {
-  const WaveGauge({super.key, required this.progress, required this.total, required this.goal, this.unit = UnitPreference.ml});
+  const WaveGauge({super.key, required this.progress, required this.total, required this.goal, this.unit = UnitPreference.ml, this.size = 260});
   final double progress;
   final int total;
   final int goal;
   final UnitPreference unit;
+  final double size;
   @override State<WaveGauge> createState() => _WaveGaugeState();
 }
 class _WaveGaugeState extends State<WaveGauge> with SingleTickerProviderStateMixin {
@@ -18,7 +19,7 @@ class _WaveGaugeState extends State<WaveGauge> with SingleTickerProviderStateMix
   @override Widget build(BuildContext context) => AnimatedBuilder(
     animation: _controller, builder: (context, child) => CustomPaint(
       painter: _WaveGaugePainter(widget.progress, _controller.value),
-      child: SizedBox(width: 260, height: 260, child: Center(child: Column(
+      child: SizedBox(width: widget.size, height: widget.size, child: Center(child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('${(widget.total / max(widget.goal, 1) * 100).round()}%', style: const TextStyle(fontSize: 44, fontWeight: FontWeight.w800)),
@@ -47,5 +48,6 @@ class _WaveGaugePainter extends CustomPainter {
     canvas.restore();
     canvas.drawCircle(center, radius, track);
   }
+
   @override bool shouldRepaint(covariant _WaveGaugePainter old) => old.progress != progress || old.phase != phase;
 }

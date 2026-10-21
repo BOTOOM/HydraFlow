@@ -10,6 +10,7 @@ import '../theme.dart';
 import '../widgets/drink_tile.dart';
 import '../widgets/droplet_avatar.dart';
 import '../widgets/insight_card.dart';
+import '../widgets/fold_split.dart';
 import '../widgets/wave_gauge.dart';
 import '../formatters.dart';
 
@@ -36,76 +37,320 @@ class HomeScreen extends StatelessWidget {
           ? null
           : intake.entries.map((e) => e.timestamp).reduce((a, b) => a.isAfter(b) ? a : b),
     );
-    return LayoutBuilder(builder: (context, constraints) {
-      final tablet = constraints.maxWidth >= 720;
-      final left = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Hola${profile.profile?.name.isNotEmpty == true ? ', ${profile.profile!.name}' : ''}', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
-        Text(DateFormat('EEEE, d MMMM', 'es').format(DateTime.now()), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-        const SizedBox(height: 18),
-        Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
-          Row(children: [
-            DropletAvatar(state: avatar, size: 120, celebrations: intake.celebrations),
-            const SizedBox(width: 12),
-            Expanded(child: _bubble(context, avatar.message)),
-          ]),
-          const SizedBox(height: 8),
-          WaveGauge(progress: intake.progress, total: intake.todayTotal, goal: intake.todayGoal, unit: profile.unit),
-          if (insights.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            ...insights.map(
-              (insight) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: InsightCard(insight: insight),
-              ),
-            ),
-          ],
-          FilledButton.icon(onPressed: () => _addSheet(context), icon: const Icon(Icons.add), label: const Text('Añadir bebida')),
-        ]))),
-        if (intake.recentDrinkIds.isNotEmpty) ...[
+    final left = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Hola${profile.profile?.name.isNotEmpty == true ? ', ${profile.profile!.name}' : ''}', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
+      Text(DateFormat('EEEE, d MMMM', 'es').format(DateTime.now()), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+      const SizedBox(height: 18),
+      Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(children: [
+        Row(children: [
+          DropletAvatar(state: avatar, size: 120, celebrations: intake.celebrations),
+          const SizedBox(width: 12),
+          Expanded(child: _bubble(context, avatar.message)),
+        ]),
+        const SizedBox(height: 8),
+        WaveGauge(progress: intake.progress, total: intake.todayTotal, goal: intake.todayGoal, unit: profile.unit),
+        if (insights.isNotEmpty) ...[
           const SizedBox(height: 12),
-          Text('Añadir de nuevo', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          SizedBox(
-            height: 92,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: intake.recentDrinkIds.map((id) {
-                final drink = drinkById(id, profile.customDrinks);
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ActionChip(
-                    avatar: Icon(drink.icon, color: drink.color ?? HydraTheme.aqua),
-                    label: Text(drink.name),
-                    onPressed: () => intake.add(id, drink.sizes.first),
-                  ),
-                );
-              }).toList(),
+          ...insights.map(
+            (insight) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: InsightCard(insight: insight),
             ),
           ),
         ],
-        const SizedBox(height: 16),
-        Row(children: [Expanded(child: _stat(context, '${intake.streak()}', 'días de racha', HydraTheme.coral)), Expanded(child: _stat(context, '${intake.todayEntries.length}', 'registros hoy', HydraTheme.aqua))]),
-      ]);
-      final right = Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('Hoy', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12), if (intake.todayEntries.isEmpty) const Padding(padding: EdgeInsets.all(20), child: Center(child: Text('Aún no hay sorbos anotados.'))),
-        ...intake.todayEntries.map((entry) {
-          final drink = drinkById(entry.drinkId, profile.customDrinks);
-          return Dismissible(
-            key: ValueKey(entry.id),
-            onDismissed: (_) => intake.remove(entry),
-            child: ListTile(
-              leading: CircleAvatar(backgroundColor: HydraTheme.aqua.withValues(alpha: .12), child: Icon(drink.icon, color: HydraTheme.aqua)),
-              title: Text(drink.name),
-              subtitle: Text(DateFormat('HH:mm').format(entry.timestamp)),
-              trailing: Text('+${formatVolume(entry.effectiveMl, profile.unit)}', style: const TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          );
-        }),
-      ])));
-      return SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), child: tablet ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: left), const SizedBox(width: 20), Expanded(child: right)]) : Column(children: [left, const SizedBox(height: 16), right]));
-    });
+        FilledButton.icon(onPressed: () => _addSheet(context), icon: const Icon(Icons.add), label: const Text('Añadir bebida')),
+      ]))),
+      if (intake.recentDrinkIds.isNotEmpty) ...[
+        const SizedBox(height: 12),
+        Text('Añadir de nuevo', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 92,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: intake.recentDrinkIds.map((id) {
+              final drink = drinkById(id, profile.customDrinks);
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ActionChip(
+                  avatar: Icon(drink.icon, color: drink.color ?? HydraTheme.aqua),
+                  label: Text(drink.name),
+                  onPressed: () => intake.add(id, drink.sizes.first),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+      const SizedBox(height: 16),
+      Row(children: [Expanded(child: _stat(context, '${intake.streak()}', 'días de racha', HydraTheme.coral)), Expanded(child: _stat(context, '${intake.todayEntries.length}', 'registros hoy', HydraTheme.aqua))]),
+    ]);
+    final right = Card(child: Padding(padding: const EdgeInsets.all(20), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('Hoy', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+      const SizedBox(height: 12), if (intake.todayEntries.isEmpty) const Padding(padding: EdgeInsets.all(20), child: Center(child: Text('Aún no hay sorbos anotados.'))),
+      ...intake.todayEntries.map((entry) {
+        final drink = drinkById(entry.drinkId, profile.customDrinks);
+        return Dismissible(
+          key: ValueKey(entry.id),
+          onDismissed: (_) => intake.remove(entry),
+          child: ListTile(
+            leading: CircleAvatar(backgroundColor: HydraTheme.aqua.withValues(alpha: .12), child: Icon(drink.icon, color: HydraTheme.aqua)),
+            title: Text(drink.name),
+            subtitle: Text(DateFormat('HH:mm').format(entry.timestamp)),
+            trailing: Text('+${formatVolume(entry.effectiveMl, profile.unit)}', style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        );
+      }),
+    ])));
+    return FoldSplit(
+      first: _duoDisplay(context, profile, intake, avatar),
+      second: _duoControls(context, profile, intake),
+      fallback: LayoutBuilder(builder: (context, constraints) {
+        final tablet = constraints.maxWidth >= 720;
+        return SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), child: tablet ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: left), const SizedBox(width: 20), Expanded(child: right)]) : Column(children: [left, const SizedBox(height: 16), right]));
+      }),
+    );
   }
+
+  Widget _duoDisplay(
+    BuildContext context,
+    ProfileController profile,
+    IntakeController intake,
+  AvatarState avatar,
+  ) => LayoutBuilder(
+    builder: (context, constraints) {
+      final widePane = constraints.maxWidth > constraints.maxHeight;
+      const headerHeight = 48.0;
+      const padding = 32.0;
+      final heightForGauge = constraints.maxHeight - headerHeight - padding;
+      final widthForGauge = constraints.maxWidth * .45;
+      final wideGaugeSize = (heightForGauge < widthForGauge ? heightForGauge : widthForGauge)
+          .clamp(140.0, 260.0)
+          .toDouble();
+      final compact = constraints.maxHeight < 520;
+      final avatarSize = compact
+          ? (constraints.maxHeight * .2).clamp(64.0, 100.0).toDouble()
+          : 120.0;
+      final gaugeSize = compact
+          ? (constraints.maxHeight * .46).clamp(150.0, 230.0).toDouble()
+          : 260.0;
+      final avatarBubble = Row(
+        children: [
+          DropletAvatar(
+            state: avatar,
+            size: avatarSize,
+            celebrations: intake.celebrations,
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: _bubble(context, avatar.message)),
+        ],
+      );
+      return Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Hola${profile.profile?.name.isNotEmpty == true ? ', ${profile.profile!.name}' : ''}',
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            Text(
+              DateFormat('EEEE, d MMMM', 'es').format(DateTime.now()),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Expanded(
+              child: widePane
+                  ? SingleChildScrollView(
+                      child: SizedBox(
+                        height: heightForGauge < wideGaugeSize
+                            ? wideGaugeSize
+                            : heightForGauge,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: Card(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: avatarBubble,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Center(
+                              child: WaveGauge(
+                                progress: intake.progress,
+                                total: intake.todayTotal,
+                                goal: intake.todayGoal,
+                                unit: profile.unit,
+                                size: wideGaugeSize,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            children: [
+                              avatarBubble,
+                              const SizedBox(height: 8),
+                              WaveGauge(
+                                progress: intake.progress,
+                                total: intake.todayTotal,
+                                goal: intake.todayGoal,
+                                unit: profile.unit,
+                                size: gaugeSize,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+
+  Widget _duoControls(
+    BuildContext context,
+    ProfileController profile,
+    IntakeController intake,
+  ) => LayoutBuilder(
+    builder: (context, constraints) {
+      final quickDrinks = drinks
+          .where((drink) => drink.id != 'custom')
+          .toList();
+      final crossAxisCount = constraints.maxWidth >= 560 ? 3 : 2;
+      return SingleChildScrollView(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Chip(
+                avatar: const Icon(Icons.flip, size: 18),
+                label: const Text('Modo Duo'),
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+            const SizedBox(height: 4),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: quickDrinks.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                mainAxisExtent: 56,
+              ),
+              itemBuilder: (context, index) {
+                final drink = quickDrinks[index];
+                final size = drink.sizes.first;
+                return FilledButton.tonal(
+                  onPressed: () => _quickAdd(context, intake, profile, drink),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(drink.icon, color: drink.color ?? HydraTheme.aqua),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          drink.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Text(formatVolume(size, profile.unit)),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 10),
+            FilledButton.icon(
+              onPressed: () => _addSheet(context),
+              icon: const Icon(Icons.add),
+              label: const Text('Añadir bebida'),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Hoy',
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (intake.todayEntries.isEmpty)
+              const Padding(
+                padding: EdgeInsets.all(20),
+                child: Center(child: Text('Aún no hay sorbos anotados.')),
+              ),
+            ...intake.todayEntries.map((entry) {
+              final drink = drinkById(entry.drinkId, profile.customDrinks);
+              return Dismissible(
+                key: ValueKey(entry.id),
+                onDismissed: (_) => intake.remove(entry),
+                child: ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: CircleAvatar(
+                    backgroundColor: HydraTheme.aqua.withValues(alpha: .12),
+                    child: Icon(drink.icon, color: HydraTheme.aqua),
+                  ),
+                  title: Text(drink.name),
+                  subtitle: Text(DateFormat('HH:mm').format(entry.timestamp)),
+                  trailing: Text(
+                    '+${formatVolume(entry.effectiveMl, profile.unit)}',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      );
+    },
+  );
+
+  Future<void> _quickAdd(
+    BuildContext context,
+    IntakeController intake,
+    ProfileController profile,
+    Drink drink,
+  ) async {
+    final size = drink.sizes.first;
+    await intake.add(drink.id, size);
+    if (!context.mounted) return;
+    _showAddedSnackBar(context, drink, size, profile.unit);
+  }
+
+  void _showAddedSnackBar(
+    BuildContext context,
+    Drink drink,
+    int size,
+    UnitPreference unit,
+  ) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Anotado +${formatVolume(size, unit)} '
+          '(equivale a ${formatVolume(drink.effectiveMl(size), unit)})',
+        ),
+      ),
+    );
+  }
+
   Widget _bubble(BuildContext context, String text) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
@@ -133,20 +378,14 @@ class HomeScreen extends StatelessWidget {
           if (context.mounted) {
             Navigator.pop(context);
             final unit = context.read<ProfileController>().unit;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Anotado +${formatVolume(size, unit)} '
-                  '(equivale a ${formatVolume(drink.effectiveMl(size), unit)})',
-                ),
-              ),
-            );
+            _showAddedSnackBar(context, drink, size, unit);
           }
         },
       ),
     );
   }
 }
+
 class _DrinkPicker extends StatefulWidget {
   const _DrinkPicker({required this.onAdded, required this.customDrinks, required this.unit});
   final Future<void> Function(Drink, int) onAdded;
@@ -173,8 +412,7 @@ class _DrinkPickerState extends State<_DrinkPicker> {
     customController.dispose();
     super.dispose();
   }
-  @override
-  Widget build(BuildContext context) {
+  @override Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
     return SafeArea(
       child: Padding(

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'data/intake_database.dart';
 import 'data/preferences_repository.dart';
 import 'services/notification_service.dart';
+import 'services/fold_regions.dart';
 import 'services/sound_service.dart';
 import 'state/controllers.dart';
 import 'ui/screens/history_screen.dart';
@@ -33,6 +34,7 @@ class _HydraFlowAppState extends State<HydraFlowApp> {
     intake = IntakeController(IntakeDatabase(), profile, sounds, notifications);
     _load();
   }
+
   Future<void> _load() async {
     await notifications.init();
     await profile.load();
@@ -40,6 +42,7 @@ class _HydraFlowAppState extends State<HydraFlowApp> {
     await intake.load();
     if (mounted) setState(() => ready = true);
   }
+
   @override void dispose() { sounds.dispose(); super.dispose(); }
   @override Widget build(BuildContext context) {
     if (!ready) return MaterialApp(theme: HydraTheme.light(), home: const Scaffold(body: Center(child: CircularProgressIndicator())));
@@ -55,6 +58,7 @@ class _HydraFlowAppState extends State<HydraFlowApp> {
         theme: HydraTheme.light(), darkTheme: HydraTheme.dark(),
         themeMode: state.theme == ThemePreference.system ? ThemeMode.system : state.theme == ThemePreference.dark ? ThemeMode.dark : ThemeMode.light,
         home: state.complete ? const Shell() : const OnboardingScreen(),
+        builder: (context, child) => FoldRegions(child: child ?? const SizedBox.shrink()),
       )),
     );
   }
