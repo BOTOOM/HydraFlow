@@ -6,6 +6,7 @@ import '../../domain/drink.dart';
 import '../../domain/hydration_insights.dart';
 import '../../domain/models.dart';
 import '../../state/controllers.dart';
+import '../posture.dart';
 import '../theme.dart';
 import '../widgets/drink_tile.dart';
 import '../widgets/droplet_avatar.dart';
@@ -14,7 +15,8 @@ import '../widgets/wave_gauge.dart';
 import '../formatters.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.postureInfo});
+  final PostureInfo? postureInfo;
   @override Widget build(BuildContext context) {
     final intake = context.watch<IntakeController>();
     final profile = context.watch<ProfileController>();
@@ -38,6 +40,11 @@ class HomeScreen extends StatelessWidget {
     );
     return LayoutBuilder(builder: (context, constraints) {
       final tablet = constraints.maxWidth >= 720;
+      final posture = postureInfo ??
+          postureOf(
+            MediaQuery.sizeOf(context),
+            MediaQuery.displayFeaturesOf(context),
+          );
       final left = Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Hola${profile.profile?.name.isNotEmpty == true ? ', ${profile.profile!.name}' : ''}', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800)),
         Text(DateFormat('EEEE, d MMMM', 'es').format(DateTime.now()), style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
@@ -103,9 +110,212 @@ class HomeScreen extends StatelessWidget {
           );
         }),
       ])));
+      final foldLabel = switch (posture.posture) {
+        HydraPosture.dualPane => 'Abierto · dos paneles',
+        HydraPosture.book => 'Modo libro',
+        HydraPosture.tabletop => 'Modo mesa',
+        _ => null,
+      };
+      final topInset = MediaQuery.paddingOf(context).top;
+      if ((posture.posture == HydraPosture.dualPane ||
+              posture.posture == HydraPosture.book) &&
+          posture.hinge != null) {
+        final hinge = posture.hinge!;
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              width: hinge.left,
+              child: SingleChildScrollView(
+                key: const ValueKey('pane-left'),
+                padding: EdgeInsets.fromLTRB(20, topInset + 20, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _postureChip(context, foldLabel!),
+                    left,
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: hinge.width),
+            Expanded(
+              child: SingleChildScrollView(
+                key: const ValueKey('pane-right'),
+                padding: EdgeInsets.fromLTRB(20, topInset + 20, 20, 20),
+                child: right,
+              ),
+            ),
+          ],
+        );
+      }
+      if (posture.posture == HydraPosture.tabletop &&
+          posture.hinge != null) {
+        final hinge = posture.hinge!;
+        final water = drinkById('water', profile.customDrinks);
+        return Column(
+          children: [
+            SizedBox(
+              key: const ValueKey('tabletop-viewer'),
+              height: hinge.top,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, topInset + 8, 20, 8),
+                child: DecoratedBox(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF174A5A), Color(0xFF102A3A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: _postureChip(context, foldLabel!),
+                      ),
+                      Center(
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: Theme.of(context)
+                                .colorScheme
+                                .copyWith(onSurfaceVariant: Colors.white70),
+                          ),
+                          child: DefaultTextStyle.merge(
+                            style: const TextStyle(color: Colors.white),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  DropletAvatar(
+                                    state: avatar,
+                                    size: 92,
+                                    celebrations: intake.celebrations,
+                                  ),
+                                  const SizedBox(width: 14),
+                                  SizedBox(
+                                    width: 180,
+                                    height: 180,
+                                    child: WaveGauge(
+                                      progress: intake.progress,
+                                      total: intake.todayTotal,
+                                      goal: intake.todayGoal,
+                                      unit: profile.unit,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: hinge.height),
+            Expanded(
+              key: const ValueKey('tabletop-controls'),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Añadir agua',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        for (final size in water.sizes.take(3))
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: OutlinedButton(
+                                onPressed: () => intake.add('water', size),
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text('+$size ml'),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () => _addSheet(context),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Añadir bebida'),
+                      ),
+                    ),
+                    if (intake.recentDrinkIds.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      Text(
+                        'Añadir de nuevo',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      Wrap(
+                        spacing: 8,
+                        children: intake.recentDrinkIds.map((id) {
+                          final drink = drinkById(id, profile.customDrinks);
+                          return ActionChip(
+                            avatar: Icon(
+                              drink.icon,
+                              color: drink.color ?? HydraTheme.aqua,
+                            ),
+                            label: Text(drink.name),
+                            onPressed: () =>
+                                intake.add(id, drink.sizes.first),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _stat(
+                            context,
+                            '${intake.streak()}',
+                            'días de racha',
+                            HydraTheme.coral,
+                          ),
+                        ),
+                        Expanded(
+                          child: _stat(
+                            context,
+                            '${intake.todayEntries.length}',
+                            'registros hoy',
+                            HydraTheme.aqua,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }
       return SingleChildScrollView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 100), child: tablet ? Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Expanded(child: left), const SizedBox(width: 20), Expanded(child: right)]) : Column(children: [left, const SizedBox(height: 16), right]));
     });
   }
+  Widget _postureChip(BuildContext context, String label) => Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Chip(label: Text(label)),
+      );
   Widget _bubble(BuildContext context, String text) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
@@ -173,6 +383,7 @@ class _DrinkPickerState extends State<_DrinkPicker> {
     customController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
@@ -191,12 +402,13 @@ class _DrinkPickerState extends State<_DrinkPicker> {
               Expanded(
                 child: GridView.builder(
                   itemCount: options.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 8,
-                    childAspectRatio: .9,
+                    mainAxisExtent: MediaQuery.textScalerOf(context).scale(
+                      _drinkTileMinimumHeight + _drinkTileExtentMargin,
+                    ),
                   ),
                   itemBuilder: (_, i) => DrinkTile(
                     drink: options[i],
@@ -250,3 +462,6 @@ class _DrinkPickerState extends State<_DrinkPicker> {
     );
   }
 }
+
+const _drinkTileMinimumHeight = 120.0;
+const _drinkTileExtentMargin = 6.0;
