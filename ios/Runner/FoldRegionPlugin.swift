@@ -95,7 +95,7 @@ final class FoldRegionPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     view.reservedRegions(kind: kind)
       .filter(\.isActive)
       .map { region in
-        let frame = view.convert(region.frame, to: view)
+        let frame = region.frame
         return [
           "x": Double(frame.origin.x),
           "y": Double(frame.origin.y),
